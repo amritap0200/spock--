@@ -33,6 +33,18 @@ except Exception as exc:
 # Extract audio from video
 # --------------------
 def extract_audio(video_path, output_path):
+    # First check if the video has an audio stream
+    probe_cmd = [
+        "ffprobe", "-v", "error",
+        "-select_streams", "a",
+        "-show_entries", "stream=codec_type",
+        "-of", "default=noprint_wrappers=1:nokey=1",
+        video_path
+    ]
+    probe_result = subprocess.run(probe_cmd, capture_output=True, text=True)
+    if "audio" not in probe_result.stdout:
+        raise ValueError("No audio stream found in video")
+
     cmd = [
         "ffmpeg", "-y",
         "-i", video_path,
@@ -40,8 +52,7 @@ def extract_audio(video_path, output_path):
         "-ar", "16000",
         "-t", "10",
         "-vn",
-        output_path,
-        "-y"
+        output_path
     ]
     subprocess.run(
         cmd,
@@ -50,7 +61,6 @@ def extract_audio(video_path, output_path):
         check=True,
     )
     return output_path
-
 
 def load_audio(path):
     audio, sr = librosa.load(path, sr=16000)
@@ -107,6 +117,14 @@ def analyze_audio(video_path):
 
     try:
         extract_audio(str(resolved_video_path), wav_path)
+    except ValueError as ve:
+        # No audio stream — not an error, just return neutral score
+        return {
+            "type": "audio",
+            "audio_probability": 0.5,
+            "status": "No Audio",
+            "error": str(ve),
+        }
     except subprocess.CalledProcessError:
         return {
             "type": "audio",
@@ -114,7 +132,7 @@ def analyze_audio(video_path):
             "status": "Error",
             "error": "ffmpeg failed to extract audio",
         }
-
+    
     try:
         audio, sr = load_audio(wav_path)
 

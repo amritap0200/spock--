@@ -13,8 +13,10 @@ from pytorch_grad_cam import GradCAM
 from pytorch_grad_cam.utils.model_targets import ClassifierOutputTarget
 from pytorch_grad_cam.utils.image import show_cam_on_image
 
+
 from backend.video_service.model import load_model
 from backend.utils import DEVICE
+
 
 
 model ,THRESHOLD= load_model()
@@ -121,7 +123,7 @@ def generate_gradcam(tensor, work_dir: Path):
         rgb_img = tensor.squeeze().permute(1, 2, 0).cpu().numpy()
         heatmap = show_cam_on_image(rgb_img, grayscale_cam, use_rgb=True)
 
-        heatmap_path = os.path.join(work_dir, "heatmap.jpg")
+        heatmap_path = BASE_DIR / "media" / f"heatmap_{uuid4().hex}.jpg"
         cv2.imwrite(heatmap_path, heatmap)
 
         model.to(original_device)
@@ -200,10 +202,10 @@ def analyze_video(video_path):
         "threshold": THRESHOLD,
     }
 
-    if final_score > THRESHOLD+margin and last_tensor is not None:
+    if last_tensor is not None:
         heatmap_path = generate_gradcam(last_tensor, work_dir)
         if heatmap_path:
-            result["heatmap"] = heatmap_path
+            result["heatmap"] = f"/media/{Path(heatmap_path).name}"
     else:
         shutil.rmtree(work_dir, ignore_errors=True)
 

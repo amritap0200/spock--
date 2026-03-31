@@ -59,6 +59,24 @@
       cursor: pointer;
     }
 
+    #analyzePageBtn {
+      width: 100%;
+      border: 0;
+      border-radius: 8px;
+      background: #1a3a5c;
+      color: #fff;
+      padding: 8px 12px;
+      font-size: 14px;
+      font-weight: 600;
+      margin: 0 0 10px;
+      cursor: pointer;
+    }
+
+    #analyzePageBtn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
     #heatmapBtn {
       width: 100%;
       border: 0;
@@ -216,7 +234,8 @@
   <button id="chooseBtn" type="button">Choose file</button>
   <p id="status">No file selected</p>
 
-  <button id="analyzeBtn" type="button">Analyze</button>
+  <button id="analyzeBtn" type="button">Analyze File</button>
+  <button id="analyzePageBtn" type="button">Analyze Current Page</button>
   <button id="heatmapBtn" type="button" disabled>Heatmap</button>
 
   <div class="gauge-shell">

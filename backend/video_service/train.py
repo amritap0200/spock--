@@ -6,8 +6,6 @@ import torch.optim as optim
 from torchvision import datasets, transforms, models
 from torch.utils.data import DataLoader, random_split
 
-
-
 DEVICE = torch.device("cpu")
 BATCH_SIZE = 16
 EPOCHS = 8
@@ -15,7 +13,8 @@ LR = 1e-3
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 DATA_DIR = str(BASE_DIR / "video_dataset")
-WEIGHTS_PATH = str(BASE_DIR / "weights" / "model.pth")
+WEIGHTS_DIR = BASE_DIR / "weights"
+os.makedirs(WEIGHTS_DIR, exist_ok=True)
 
 
 transform = transforms.Compose([
@@ -76,6 +75,10 @@ for epoch in range(EPOCHS):
         total_loss += loss.item()
 
     print(f"Epoch [{epoch+1}/{EPOCHS}] Loss: {total_loss/len(train_loader):.4f}")
+    torch.save({
+       "model_state": model.state_dict(),
+       "epoch": epoch
+   }, str(WEIGHTS_DIR / f"video_checkpoint_epoch_{epoch+1}.pth"))
 
 print("Training complete.")
 
@@ -128,7 +131,8 @@ os.makedirs(str(BASE_DIR / "weights"), exist_ok=True)
 torch.save({
     "model_state": model.state_dict(),
     "threshold": best_threshold
-}, WEIGHTS_PATH)
+}, str(WEIGHTS_DIR / "video_model.pth"))
+
 print("Real mean:", np.mean(real_scores))
 print("Fake mean:", np.mean(fake_scores))
 print("Best threshold:", best_threshold)

@@ -32,6 +32,7 @@ with torch.no_grad():
 
 
 BASE_DIR = Path(__file__).resolve().parent.parent
+os.makedirs(BASE_DIR / "weights", exist_ok=True)
 DATASET_ROOT = BASE_DIR / "audio_dataset"
 
 REAL_DIR = os.path.join(str(DATASET_ROOT), "real")
@@ -66,7 +67,7 @@ train_dataset, val_dataset = random_split(dataset, [train_size, val_size])
 train_loader = DataLoader(train_dataset, batch_size=8, shuffle=True)
 val_loader = DataLoader(val_dataset, batch_size=8, shuffle=False)
 
-EPOCHS = 8
+EPOCHS = 20
 
 for epoch in range(EPOCHS):
     total_loss = 0
@@ -86,6 +87,10 @@ for epoch in range(EPOCHS):
         total_loss += loss.item()
 
     print(f"Epoch {epoch+1}, Loss: {total_loss/len(train_loader)}")
+    torch.save({
+       "model_state": model.state_dict(),
+       "epoch": epoch
+    }, str(BASE_DIR / "weights" / f"audio_checkpoint_epoch_{epoch+1}.pth"))
 
 
 

@@ -1,7 +1,9 @@
 import os
-import librosa
+import soundfile as sf
+from scipy.signal import resample
 import numpy as np
 import torch
+from python_speech_features import logfbank
 from torch.utils.data import Dataset
 
 class AudioDataset(Dataset):
@@ -16,17 +18,29 @@ class AudioDataset(Dataset):
         path = self.file_paths[idx]
         label = self.labels[idx]
 
-        audio, sr = librosa.load(path, sr=16000)
+        audio, sr = sf.read(path)
 
-        mel = librosa.feature.melspectrogram(
-            y=audio,
-            sr=sr,
-            n_mels=128,
-            n_fft=1024,
-            hop_length=512
+        # convert to mono if needed
+        if len(audio.shape) > 1:
+           audio = audio.mean(axis=1)
+
+        # resample if needed
+        if sr != 16000:
+           num_samples = int(len(audio) * 16000 / sr)
+           audio = resample(audio, num_samples)
+           sr = 16000
+
+        mel = logfbank(
+           audio,
+           samplerate=sr,
+           nfilt=128,
+           winlen=1024/sr,
+           winstep=512/sr,
+           nfft=1024
         )
 
-        mel = librosa.power_to_db(mel, ref=np.max)
+        mel = mel.T
+
         mel = np.nan_to_num(mel)
 
         MAX_LEN = 300  # choose fixed time dimension

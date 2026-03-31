@@ -10,7 +10,7 @@ from backend.audio_service import analyze_audio
 from backend.metadata_service import analyze_metadata
 from backend.scoring import compute_final_score
 
-video_path = str(Path(__file__).resolve().parent / "media" / "fake1.mp4")
+video_path = str(Path(__file__).resolve().parent / "media" / "test_with_audio.mp4")
 
 print("\nRunning full pipeline locally...\n")
 
